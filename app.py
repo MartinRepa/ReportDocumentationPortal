@@ -4,11 +4,13 @@ import configparser
 from decode_var import decode_cred
 import os
 import sys
+from dotenv import load_dotenv                                                
+import os
 
 sys.path.append('C:\\PythonProjects\\pr_ReportDocumentationPortal')
 
-user = 'rr'
-password = 'pp'
+user = os.getenv("USER")
+password = os.getenv("PASSWORD")
 
 app = Flask(__name__)
 
