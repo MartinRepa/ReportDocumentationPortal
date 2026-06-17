@@ -49,7 +49,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function filterDropdownOptions(searchInput, optionsContainer) {
         const filterText = searchInput.value.toLowerCase();
         [...optionsContainer.children].forEach(option => {
-            if (option.textContent.toLowerCase().startsWith(filterText)) {
+            //Ndryshova nga startsWith me includes që të gjejë përputhje kudo në tekst, jo vetëm nga fillimi
+            if (option.textContent.toLowerCase().includes(filterText)) {
                 option.style.display = '';
             } else {
                 option.style.display = 'none';
@@ -143,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 resultContainer.innerHTML = '';
 
                 if (results.length > 0) {
-                    let htmlContent = '<div class="result-container"><h4>Results:</h4>';
+                    let htmlContent = '<div class="result-container"><button id="downloadReportBtn" class="btn btn-success mb-3">Download Report</button><h4>Results:</h4>';
 
                     results.forEach(result => {
                         htmlContent += `
@@ -185,11 +186,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     htmlContent += '</div>';
                     resultContainer.innerHTML = htmlContent;
+                    document.getElementById('downloadReportBtn').addEventListener('click', function () {
+                        downloadReport();
+                    });
                 } else {
                     resultContainer.innerHTML = '<p class="no-results">No results found.</p>';
                 }
             });
     });
+
+    // Shkarko raportin direkt si PDF 
+    function downloadReport() {
+        const element = document.getElementById('resultContainer');
+        const btn = document.getElementById('downloadReportBtn');
+        btn.style.display = 'none';
+
+        html2pdf()
+            .set({
+                margin: 10,
+                filename: 'report.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            })
+            .from(element)
+            .save()
+            .then(function () {
+                btn.style.display = '';
+            });
+    }
 
     clearButton.addEventListener('click', function () {
         nameButton.textContent = "Select Requestor Name";

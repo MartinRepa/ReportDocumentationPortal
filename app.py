@@ -1,32 +1,14 @@
 from flask import Flask, request, render_template, jsonify
-import pyodbc
-import configparser
-from decode_var import decode_cred
-import os
-import sys
-from dotenv import load_dotenv                                                
+import sqlite3
 import os
 
-sys.path.append('C:\\PythonProjects\\pr_ReportDocumentationPortal')
-
-user = os.getenv("USER")
-password = os.getenv("PASSWORD")
+DB_PATH = os.path.join(os.path.dirname(__file__), 'dummy.db')
 
 app = Flask(__name__)
 
 def get_db_connection():
-
-    config = configparser.ConfigParser()
-    config.read(os.path.join(os.path.dirname(__file__),'config.ini'))
-    db_config = config['database']
-
-    connection = pyodbc.connect(
-        f"DRIVER={db_config['DRIVER']};"
-        f"SERVER={db_config['SERVER']};"
-        f"DATABASE={db_config['DATABASE']};"
-        f"user={user};"
-        f"password={password}"           
-    )
+    connection = sqlite3.connect(DB_PATH)
+    connection.row_factory = sqlite3.Row
     return connection
 
 @app.route('/')
@@ -42,16 +24,16 @@ def get_requestor_name():
     
     
     if RequestorDepartment and ReportTitle:
-        query = "SELECT DISTINCT RequestorName FROM BI_REPORT_MONITOR.dbo.ReportList WHERE RequestorDepartment=? AND ReportTitle=?"
+        query = "SELECT DISTINCT RequestorName FROM ReportList WHERE RequestorDepartment=? AND ReportTitle=?"
         cursor.execute(query, (RequestorDepartment, ReportTitle))
     elif RequestorDepartment:
-        query = "SELECT DISTINCT RequestorName FROM BI_REPORT_MONITOR.dbo.ReportList WHERE RequestorDepartment=?"
+        query = "SELECT DISTINCT RequestorName FROM ReportList WHERE RequestorDepartment=?"
         cursor.execute(query, (RequestorDepartment,))
     elif ReportTitle:
-        query = "SELECT DISTINCT RequestorName FROM BI_REPORT_MONITOR.dbo.ReportList WHERE ReportTitle=?"
+        query = "SELECT DISTINCT RequestorName FROM ReportList WHERE ReportTitle=?"
         cursor.execute(query, (ReportTitle,))
     else:
-        query = "SELECT DISTINCT RequestorName FROM BI_REPORT_MONITOR.dbo.ReportList"
+        query = "SELECT DISTINCT RequestorName FROM ReportList"
         cursor.execute(query)
     
     names = [row[0] for row in cursor.fetchall()]
@@ -67,16 +49,16 @@ def get_requestor_department():
     cursor = connection.cursor()
     
     if RequestorName and ReportTitle:
-        query = "SELECT DISTINCT RequestorDepartment FROM BI_REPORT_MONITOR.dbo.ReportList WHERE RequestorName=? AND ReportTitle=?"
+        query = "SELECT DISTINCT RequestorDepartment FROM ReportList WHERE RequestorName=? AND ReportTitle=?"
         cursor.execute(query, (RequestorName, ReportTitle))
     elif RequestorName:
-        query = "SELECT DISTINCT RequestorDepartment FROM BI_REPORT_MONITOR.dbo.ReportList WHERE RequestorName=?"
+        query = "SELECT DISTINCT RequestorDepartment FROM ReportList WHERE RequestorName=?"
         cursor.execute(query, (RequestorName,))
     elif ReportTitle:
-        query = "SELECT DISTINCT RequestorDepartment FROM BI_REPORT_MONITOR.dbo.ReportList WHERE ReportTitle=?"
+        query = "SELECT DISTINCT RequestorDepartment FROM ReportList WHERE ReportTitle=?"
         cursor.execute(query, (ReportTitle,))
     else:
-        query = "SELECT DISTINCT RequestorDepartment FROM BI_REPORT_MONITOR.dbo.ReportList"
+        query = "SELECT DISTINCT RequestorDepartment FROM ReportList"
         cursor.execute(query)
     
     departments = [row[0] for row in cursor.fetchall()]
@@ -91,16 +73,16 @@ def get_report_title():
     cursor = connection.cursor()
     
     if RequestorName and RequestorDepartment:
-        query = "SELECT DISTINCT ReportTitle FROM BI_REPORT_MONITOR.dbo.ReportList WHERE RequestorName=? AND RequestorDepartment=?"
+        query = "SELECT DISTINCT ReportTitle FROM ReportList WHERE RequestorName=? AND RequestorDepartment=?"
         cursor.execute(query, (RequestorName, RequestorDepartment))
     elif RequestorName:
-        query = "SELECT DISTINCT ReportTitle FROM BI_REPORT_MONITOR.dbo.ReportList WHERE RequestorName=?"
+        query = "SELECT DISTINCT ReportTitle FROM ReportList WHERE RequestorName=?"
         cursor.execute(query, (RequestorName,))
     elif RequestorDepartment:
-        query = "SELECT DISTINCT ReportTitle FROM BI_REPORT_MONITOR.dbo.ReportList WHERE RequestorDepartment=?"
+        query = "SELECT DISTINCT ReportTitle FROM ReportList WHERE RequestorDepartment=?"
         cursor.execute(query, (RequestorDepartment,))
     else:
-        query = "SELECT DISTINCT ReportTitle FROM BI_REPORT_MONITOR.dbo.ReportList"
+        query = "SELECT DISTINCT ReportTitle FROM ReportList"
         cursor.execute(query)
     
     titles = [row[0] for row in cursor.fetchall()]
@@ -116,7 +98,7 @@ def search():
     ReportTitle = request.args.get('ReportTitle')
     connection = get_db_connection()
     cursor = connection.cursor()
-    query = """SELECT * FROM BI_REPORT_MONITOR.dbo.ReportList 
+    query = """SELECT * FROM ReportList
                WHERE RequestorName=? AND RequestorDepartment=? AND ReportTitle=?"""
     cursor.execute(query, (RequestorName, RequestorDepartment, ReportTitle))
     columns = [column[0] for column in cursor.description]

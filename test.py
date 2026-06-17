@@ -18,11 +18,55 @@ app = Flask(__name__)
 
 def get_db_connection():
 
-    config = configparser.ConfigParser()
-    config.read(os.path.join(os.path.dirname(__file__),'config.ini'))
-    db_config = config['database']
-    return db_config
+ 
 
-print(get_db_connection())
-config = configparser.ConfigParser()
-print(config.read(os.path.join(os.path.dirname(__file__),'config.ini')))
+    config = configparser.ConfigParser()
+
+    config.read(os.path.join(os.path.dirname(__file__),'config.ini'))
+
+    db_config = config['database']
+
+ 
+
+    connection = pyodbc.connect(
+
+        f"DRIVER={db_config['DRIVER']};"
+
+        f"SERVER={db_config['SERVER']};"
+
+        f"DATABASE={db_config['DATABASE']};"
+
+        f"user={user};"
+
+        f"password={password}"          
+
+    )
+
+    return connection
+
+ 
+
+connection = get_db_connection()
+
+cursor = connection.cursor()
+
+query = "SELECT DISTINCT RequestorName FROM BI_REPORT_MONITOR.dbo.ReportList"
+
+ 
+
+cursor.execute(query)
+
+ 
+
+rows = cursor.fetchall()
+
+ 
+
+for row in rows:
+
+    print(row)
+
+ 
+
+connection.close()
+
