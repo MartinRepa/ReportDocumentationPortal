@@ -1,0 +1,14 @@
+<VirtualHost *:80>
+    ServerName localhost
+
+    WSGIDaemonProcess ReportDocumentationPortal                               
+    python-home=C:\actual\path\to\venv
+    python-path=C:\actual\path\to\ReportDocumentationPortal                       
+    WSGIProcessGroup ReportDocumentationPortal
+    WSGIScriptAlias /
+    C:\actual\path\to\ReportDocumentationPortal\ReportDocumentationPortal.wsgi    
+   
+    <Directory C:\actual\path\to\ReportDocumentationPortal>                   
+          Require all granted
+    </Directory>
+</VirtualHost>
